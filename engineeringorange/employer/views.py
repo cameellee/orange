@@ -21,6 +21,11 @@ def editaccount(request, userid):
 
 def index(request, userid):
 	account = get_object_or_404(Accounts, userid=userid)
-	emp = get_object_or_404(Employer, userid=userid)
-	return render_to_response('employer.html', {'employer': emp, 'user': account, 'announcements': Announcement.objects.filter(annType='e').distinct()[:10]})
-	
+	print account.usertype
+	if account.usertype == 'employer':
+		emp = get_object_or_404(Employer, userid=userid)
+		return render_to_response('employer.html', {'employer': emp, 'user': account, 'announcements': Announcement.objects.filter(annType='e').distinct()[:10]})
+	if account.usertype == 'jobseeker':
+		seeker = get_object_or_404(Jobseeker, userid=userid)
+		return render_to_response('jobseeker.html', {'jobseeker': seeker, 'user': account, 'announcements': Announcement.objects.filter(annType='j').distinct()[:10]})
+	return HttpResponseRedirect('/')

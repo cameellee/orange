@@ -2,11 +2,11 @@
 from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib import auth
 from resume.models import *
 from messages.models import *
-from django.db.models import Q
 from resume.forms import RegistrationForm, LogInForm
 import datetime
 import csv
@@ -23,7 +23,7 @@ def login(request):
                 auth.login(request, user)
                 print('logged')
                 if acc.usertype == 'jobseeker':
-                    return HttpResponse('jobseeker')
+                    return HttpResponseRedirect('/jobseeker/' + str(acc.userid) + '/')
                     #HttpRedirect to jobseeker page here
                 else:
                     return HttpResponseRedirect('/employer/'+str(acc.userid)+'/')
@@ -31,7 +31,7 @@ def login(request):
             print('user is not in database or is not active')
     else:
         loginForm = LogInForm()
-    return render_to_response('registration/login.html',{'form':loginForm},context_instance=RequestContext(request))
+    return render_to_response('login.html',{'form':loginForm},context_instance=RequestContext(request))
 
 def register (request):
     if request.method == 'POST':
@@ -43,14 +43,13 @@ def register (request):
             user.is_active = True
             newAccount = Accounts(userid=request.POST['username'],email=request.POST['email'],usertype='jobseeker',userlink=user)
             newJobseeker = Jobseeker(userid=newAccount,firstname=request.POST['firstName'],lastname=request.POST['lastName'])
-            #user.save()
-            #newAccount.save()
-            #newJobseeker.save()
+            newAccount.save()
+            newJobseeker.save()
             #print('hello')
-            return HttpResponse("hello user has been created")
+            return HttpResponse("Hello user has been created")
     else:
         regForm = RegistrationForm()
-    return render_to_response('registration/registration.html',{'form':regForm},context_instance=RequestContext(request))
+    return render_to_response('registration.html',{'form':regForm},context_instance=RequestContext(request))
 
 def exporttocsv(request, userid, courseid, batch, city):
     account = get_object_or_404(Accounts, userid=userid)

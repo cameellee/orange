@@ -256,9 +256,13 @@ class Announcement (models.Model):
     datePosted = models.DateTimeField(default=datetime.datetime.now(),blank=True)
     annType = models.CharField(max_length=1,choices=types)
     
+    class Meta:
+        db_table = u'announcement'
+    
     def __unicode__(self):
-        return unicode(self.annID,self.annText)
+        return unicode((self.annID,self.annText))
 
+#FORMS
 class SearchForm(ModelForm):
 	courseid = forms.ModelChoiceField(queryset=Course.objects.all(), label="Course")
 	class Meta:

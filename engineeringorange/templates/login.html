@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Engineering Orange</title>
+	<style>
+		body{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 0.9em;
+		}	
+		
+		#wrapper{
+			height: 30em;
+			position: relative;
+			top:auto;
+		}
+		
+	</style>
+</head>
+	{% block title %}Login Here{% endblock %}
+	{% block content%}
+	<div id="wrapper">
+		<div>
+			{% if form.messages.errors %}
+			{{ form.messages.errors }}
+			{% endif %}
+			{% if doesNotExist %}
+			{{ error_message }}
+			{% endif %}
+		</div>
+		<fieldset>
+			<form action="", method="post">
+				{% csrf_token%}
+					{{form.as_p}}		
+						<input type='submit' value='login' class="formbutton"/>
+			</form>
+		</fieldset>
+	</div>
+	{% endblock %}
+</html>
