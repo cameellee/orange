@@ -11,9 +11,18 @@
 	</fieldset>
 	
 	{% if course or batch or city %}
-    <h2>Results:</h2>
-    {% if results %}
-	<p align="right"><a href="/resume/exporttocsv/{{course}}/{{batch}}/{{city}}">Save Results to CSV</a></p>
+	<table> 
+		<tr>   
+			<td width = 500 ><h2>Results:</h2></td>
+    	{% if results %}
+			<td>
+				<form action= "/resume/exporttocsv/{{user.userid}}/{{course}}/{{batch}}/{{city}}" method="POST"> 
+					{% csrf_token %}
+					<input type="submit" name="send" class="floatbutton" value="Save Results to CSV" />
+				</form>
+			</td>
+		</tr>
+	</table>	
 		<table id = "results">
 			<tr>
 				<th/>Last Name
@@ -45,6 +54,8 @@
 		</script>
 
     {% else %}
+	</tr>
+	</table>
       <p><h4/>No Resumes found</p>
     {% endif %}
     {% endif %}

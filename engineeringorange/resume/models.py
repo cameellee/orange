@@ -266,6 +266,8 @@ class SearchForm(ModelForm):
 		fields = ('courseid', 'batch', 'city')
 
 class StudentForm(ModelForm):
+	firstname = forms.CharField(label="First Name")
+	lastname = forms.CharField(label = "Last Name")
 	class Meta:
 		model = Jobseeker
 		fields = ('firstname', 'lastname')

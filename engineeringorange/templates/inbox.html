@@ -1,6 +1,12 @@
 {% extends 'baseemployer.html' %} 
  {% block head_title %} Engineering Orange {% endblock %}
- {% block title %}<h3/>Messages{% endblock %}
+ {% block title %}
+	{% if sent %}
+		<h3>Sent Messages </h3>	
+	{% else %}	
+		<h3>Messages</h3>
+	{% endif %}
+ {% endblock %}
  
  {% block content %}
 	{% if messages %}
@@ -26,7 +32,12 @@
 					<td>{{msg.subject}}</td>
 					<td>{{msg.message}}</td>
 					<td>{{msg.senddate}}</td>
-					<td><a href = "/message/delete/{{user.userid}}/{{msg.msgid}}" onclick="return confirm('Are you sure you want to delete?')">delete<a/></td>
+					<td>
+						 <form action= "/message/delete/{{user.userid}}/{{msg.msgid}}/" method="post">
+							{% csrf_token %}{{ delete.as_p }} 
+							<input type="submit" name="send" class="floatbutton" value="Delete Message" onclick="return confirm('Are you sure you want to delete?')" /> 
+						</form>
+					</td>
 				</tr>
             {% endfor %}
         </table>
@@ -34,7 +45,7 @@
 		<div id="pageNavPosition" align="right"></div>
 			
 		<script type="text/javascript">
-			var pager = new Pager('results', 20); 
+			var pager = new Pager('results', 10); 
 			pager.init(); 
 			pager.showPageNav('pager', 'pageNavPosition'); 
 			pager.showPage(1);

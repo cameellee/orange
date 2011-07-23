@@ -52,87 +52,88 @@ def register (request):
         regForm = RegistrationForm()
     return render_to_response('registration/registration.html',{'form':regForm},context_instance=RequestContext(request))
 
-def exporttocsv(request, courseid, batch, city):
-    print courseid
-    print batch
-    print city
-    if courseid or batch or city:
-        print("I got here too!")
-        if courseid != 15:
-            qset = (
-                Q(courseid=courseid) | 
-                Q(batch=batch)  |
-                Q(city=city)
-	        )
+def exporttocsv(request, userid, courseid, batch, city):
+    account = get_object_or_404(Accounts, userid=userid)
+    if request.POST:
+        if courseid or batch or city:
+            print("I got here too!")
+            if courseid != 15:
+                qset = (
+                    Q(courseid=courseid) | 
+                    Q(batch=batch)  |
+                    Q(city=city)
+	            )
+            else:
+                qset = (
+                    Q(batch=batch) | 
+                    Q(city=city)
+                )
+      	    results = Jobseeker.objects.filter(qset).distinct()
         else:
-            qset = (
-                Q(batch=batch) | 
-                Q(city=city)
-            )
-        print qset
-    	results = Jobseeker.objects.filter(qset).distinct()
-    else:
 	    results = []
 
-    response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=results.csv'
-    writer = csv.writer(response)
-    writer.writerow(['Lastname', 'Firstname', 'Course', 'Batch', 'Telphone Number', 'Mobile Number', 'Permanent Address'])
-    for result in results:
-        writer.writerow([result.lastname, result.firstname, result.courseid, result.batch, result.telephonenumber, result.mobilenumber, result.permanentaddress])
-    return response
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=results.csv'
+        writer = csv.writer(response)
+        writer.writerow(['Lastname', 'Firstname', 'Course', 'Batch', 'Telphone Number', 'Mobile Number', 'Permanent Address'])
+        for result in results:
+           writer.writerow([result.lastname, result.firstname, result.courseid, result.batch, result.telephonenumber, result.mobilenumber, result.permanentaddress])
+        return response
+    else:
+        return HttpResponseRedirect("/jobpost/" + str(account.userid))
 
 def search(request, userid):
     account = get_object_or_404(Accounts, userid=userid)
-	
-    form = SearchForm(request.POST or None)
-    course = request.GET.get('courseid', 0)
-    batch = request.GET.get('batch', '')
-    city = request.GET.get('city', '')
-    if course or batch or city:
-        print("I got here!")
-        if course != '':
-            qset = (
-                Q(courseid=course) | 
-                Q(batch=batch)  |
-                Q(city=city)
-	        )
+    if account.usertype == 'employer':	
+        form = SearchForm(request.POST or None)
+        course = request.GET.get('courseid', 0)
+        batch = request.GET.get('batch', '')
+        city = request.GET.get('city', '')
+        if course or batch or city:
+            print("I got here!")
+            if course != '':
+                qset = (
+                    Q(courseid=course) | 
+                    Q(batch=batch)  |
+                    Q(city=city)
+	            )
+            else:
+                qset = (
+                    Q(batch=batch) | 
+                    Q(city=city)
+                )
+                course = 15			    
+            results = Jobseeker.objects.filter(qset).distinct()
+            if city == '':
+	            city = 'na'
         else:
-            qset = (
-                Q(batch=batch) | 
-                Q(city=city)
-            )
-            course = 15			    
-        print qset
-        print city
-    	results = Jobseeker.objects.filter(qset).distinct()
-        if city == '':
-	        city = 'na'
+	        results = []
+        return render_to_response("searchresume.html/", {"user": account, "form": form, "results": results, "course":course, "batch": batch, "city": city},   context_instance=RequestContext(request))
     else:
-	    results = []
-    return render_to_response("searchresume.html/", {"user": account, "form": form, "results": results, "course":course, "batch": batch, "city": city},   context_instance=RequestContext(request))
- 
+        return HttpResponseRedirect("/jobpost/" + str(account.userid))
+
 def searchone(request, userid):
     account = get_object_or_404(Accounts, userid=userid)
-    form = StudentForm(request.POST or None)
+    if account.usertype == 'employer':	
+        form = StudentForm(request.POST or None)
     
-    last = request.GET.get('lastname')
-    first = request.GET.get('firstname')
+        last = request.GET.get('lastname')
+        first = request.GET.get('firstname')
 
-    if last or first:
-        qset = (
-            Q(lastname=last) | 
-            Q(firstname=first)
-        )
-        last = first + last
-        print qset
-    	results = Jobseeker.objects.filter(qset).distinct()
-    else:
+        if last or first:
+            qset = (
+                Q(lastname=last) | 
+                Q(firstname=first)
+            )
+            last = first + last
+            results = Jobseeker.objects.filter(qset).distinct()
+        else:
 	    results = []
-    return render_to_response("searcharesume.html/", {"user": account, "form": form, "results": results, "query":last},   context_instance=RequestContext(request))
+        return render_to_response("searcharesume.html/", {"user": account, "form": form, "results": results, "query":last},   context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect("/jobpost/" + str(account.userid))
 	
 def resume(request, userid, stdid):
-	# Get Everything!
 	account = get_object_or_404(Accounts, userid=userid)
 	resume = Jobseeker.objects.get(userid=stdid)
 	aff = Jsaffiliations.objects.filter(userid=stdid).distinct()

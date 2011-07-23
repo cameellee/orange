@@ -34,10 +34,9 @@ urlpatterns += patterns('',
     url(r'^searchresume/(?P<userid>.*)/$', 'engineeringorange.resume.views.search'),
 	url(r'^searcharesume/(?P<userid>.*)/$', 'engineeringorange.resume.views.searchone'),
     url(r'^resume/(?P<userid>.*)/(?P<stdid>.*)/$', 'engineeringorange.resume.views.resume'),
-	url(r'^resume/exporttocsv/(?P<courseid>.*)/(?P<batch>.*)/(?P<city>.*)$', 'engineeringorange.resume.views.exporttocsv'),
+	url(r'^resume/exporttocsv/(?P<userid>.*)/(?P<courseid>.*)/(?P<batch>.*)/(?P<city>.*)$', 'engineeringorange.resume.views.exporttocsv'),
     #Employer URLS
     url(r'^employer/editaccount/(?P<userid>.*)/$', 'engineeringorange.employer.views.editaccount'),
-    url(r'^employer/messages/(?P<userid>.*)/$', 'engineeringorange.messages.views.viewall'),
     url(r'^employer/(?P<userid>.*)/$', 'engineeringorange.employer.views.index'),
     #Message URLS
     url(r'^message/delete/(?P<userid>.*)/(?P<msgid>.*)/$', 'engineeringorange.messages.views.delete'),
