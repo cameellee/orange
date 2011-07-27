@@ -30,7 +30,7 @@
 <td>{{msg.fromid.email}}</td>
 {% endif %}
 <td>{{msg.subject}}</td>
-<td>{{msg.message}}</td>
+<td> <p style="white-space:pre">{{msg.message}}</p></td>
 <td>{{msg.senddate}}</td>
 <td>
 <form action= "/message/delete/{{user.userid}}/{{msg.msgid}}/" method="post">

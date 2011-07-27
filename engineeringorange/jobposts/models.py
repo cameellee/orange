@@ -16,3 +16,11 @@ class JobPositionForm(ModelForm):
 	class Meta:
 		model = Jobpositions
 		exclude = ('jobid')
+
+class JobSearchForm(ModelForm):
+	title = forms.CharField(label="Keyword")
+	industryid = forms.ModelChoiceField(queryset=Industry.objects.all(), label="Industry")
+	class Meta:
+		model = Jobpositions
+		exclude = ('jobid', 'description')
+

@@ -14,12 +14,12 @@
 
 	<fieldset/>
 	<legend><h4>Job Description</h4></legend>
-	<pre>{{post.description}}</pre>
+	<p style="white-space:pre">{{post.description}}</p>
 	<p/>
 
 	<fieldset/>
 	<legend><h4>Job Qualification</h4></legend>
-	<pre>{{qualifications.qualifications}}</pre>
+	<p style="white-space:pre">{{qualifications.qualifications}}</p>
 	<p/>
 	<p/>
 
@@ -28,8 +28,8 @@
 		<p>
 		<b>This post is valid until:</b> {{qualifications.validity}}
 		</p>
+		{% endif %}
 	{% endif %}
-
 
 	{% if sent%}
 		<div id = "notice">
@@ -41,12 +41,12 @@
 	{% if form%}
 		{% if not closed %}
 			<p align="left">
-			<fieldset>
-				<legend><h4>Apply for this Job</h4></legend>
-				<form action="#" method="post">
-					{% csrf_token %}{{ form.as_p }}
-					<p><input type="submit" name="send" class="formbutton" value="Submit" /></p>
-				</form>
+				<fieldset>
+					<legend><h4>Apply for this Job</h4></legend>
+					<form action="#" method="post">
+						{% csrf_token %}{{ form.as_p }}
+						<p><input type="submit" name="send" class="formbutton" value="Submit" /></p>
+					</form>
 			</fieldset>
 			</p>
 		{% else %}
@@ -54,23 +54,25 @@
 				This Job posting has been closed.
 			</div>
 		{% endif %}
-	{% else %}
+	{% endif %}
+	
+	{% if company.userid.userid == user.userid %}
 		<table>
 			<tr>
-				<td width = 500>
+				<td id = "holder" width="500">
 					{% if not closed %}
 						<b>This post is valid until:</b> {{qualifications.validity}}
 					{% else %}
 						<b> This post has expired </b>
 					{% endif %}
 				</td>
-				<td>
+				<td id = "holder">
 					<form action= "/jobpost/edit/{{user.userid}}/{{post.jobid}}">
 						{% csrf_token %}
 						<input type="submit" name="send" class="floatbutton" value="Edit this Job Post" />
 					</form>
 				</td>
-				<td>
+				<td id = "holder">
 					<form action= "/jobpost/delete/{{user.userid}}/{{post.jobid}}/" method="post">
 						{% csrf_token %}
 						<input type="submit" name="send" class="floatbutton" value="Delete Message" onclick="return confirm('Are you sure you want to delete?')" />
@@ -79,5 +81,5 @@
 			</tr>
 		</table>
 	{% endif %}
-	{% endif %}
+
     {% endblock %}

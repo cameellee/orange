@@ -1,5 +1,6 @@
 from engineeringorange.jobposts.models import *
 from engineeringorange.messages.models import *
+from django.db.models import Q
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response, get_object_or_404
@@ -99,4 +100,3 @@ def viewall(request, userid):
 		return render_to_response('viewallpost.html', {'user' : account, 'posts': Jobpostings.objects.filter(userid=userid).distinct(), 'delete': deleteButton}, context_instance=RequestContext(request))
 	else:
 		return render_to_response('viewallpost.html', {'user' : account, 'posts': Jobpostings.objects.all().distinct()}, context_instance=RequestContext(request))
-

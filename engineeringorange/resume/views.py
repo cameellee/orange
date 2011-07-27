@@ -1,5 +1,6 @@
 # Create your views here.
 from django.shortcuts import get_object_or_404, render_to_response
+from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.db.models import Q
@@ -51,11 +52,34 @@ def register (request):
         regForm = RegistrationForm()
     return render_to_response('registration.html',{'form':regForm},context_instance=RequestContext(request))
 
+def sendpassword(request):
+    email = request.POST.get('email', '')
+
+    # generate a new password
+    result = 'hello'
+    while result:
+        password = str(random.randint(0,10000000000))
+        result = get_object_or_404(User, password = password)
+    
+    subject = 'Engineering Orange: Your New Password'
+    message = 'The password for your account is: ' + password + '. Please access your account and change the password immediately.'
+
+    if email:
+        try:
+            #place new password
+            result.password = password
+            result.save()
+            send_mail(subject, message, 'engineeringorange@gmail.com', [email])
+        except BadHeaderError:
+            return HttpResponse('Invalid header found.')
+        return HttpResponseRedirect("/")
+    else:
+        return HttpResponse('The email entered does not have a corresponding account. Create an account for Orange now!')
+
 def exporttocsv(request, userid, courseid, batch, city):
     account = get_object_or_404(Accounts, userid=userid)
     if request.POST:
         if courseid or batch or city:
-            print("I got here too!")
             if courseid != 15:
                 qset = (
                     Q(courseid=courseid) | 
@@ -89,7 +113,6 @@ def search(request, userid):
         batch = request.GET.get('batch', '')
         city = request.GET.get('city', '')
         if course or batch or city:
-            print("I got here!")
             if course != '':
                 qset = (
                     Q(courseid=course) | 
@@ -137,7 +160,7 @@ def resume(request, userid, stdid):
 	resume = Jobseeker.objects.get(userid=stdid)
 	aff = Jsaffiliations.objects.filter(userid=stdid).distinct()
 	awards = Jsawards.objects.filter(userid=stdid).distinct()
-	education = Jseducation.objects.get(userid=stdid)
+	education = Jseducation.objects.filter(userid=stdid).distinct()
 	employment = Jsemployment.objects.filter(userid=stdid).distinct()
 	project = Jsprojects.objects.filter(userid=stdid).distinct()
 	seminar = Jsseminars.objects.filter(userid=stdid).distinct()
@@ -152,6 +175,10 @@ def resume(request, userid, stdid):
 			newmsg.toid = resume.userid
 			newmsg.senddate = datetime.datetime.now()
 			newmsg.save()
-			return render_to_response("resume.html/", {"user": account, "resume": resume, "affliations": aff, "awards":awards, "education": education, "employment": employment, "project": project, "seminar": seminar, "employer": employment, "form": MessageForm(None), "sent": "Your Message has been sent!"},context_instance=RequestContext(request))
-		
-	return render_to_response("resume.html/", {"user": account, "resume": resume, "affliations": aff, "awards":awards, "education": education, "employment": employment, "project": project, "seminar": seminar, "employer": employment, "form": form},context_instance=RequestContext(request))	
+			return render_to_response("resume.html/", {"user": account, "resume": resume, "aff": aff, "awards":awards, "education": education, "employment": employment, "project": project, "seminar": seminar, "employer": employment, "form": MessageForm(None), "sent": "Your Message has been sent!"},context_instance=RequestContext(request))
+	
+		return render_to_response("resume.html/", {"user": account, "resume": resume, "aff": aff, "awards":awards, "education": education, "employment": employment, "project": project, "seminar": seminar, "employer": employment, "form": form},context_instance=RequestContext(request))
+	if userid == stdid:
+		return render_to_response("resume.html/", {"user": account, "resume": resume, "aff": aff, "awards":awards, "education": education, "employment": employment, "project": project, "seminar": seminar, "employer": employment})
+
+	return HttpResponseRedirect('/resume/' + str(account.userid) + '/' + str(account.userid))

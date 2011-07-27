@@ -151,7 +151,7 @@ class Jsskills(models.Model):
         return unicode((self.userid,self.skillid))
 
 class Jsaffiliations(models.Model):
-    userid = models.ForeignKey(Accounts, db_column='userID',primary_key=True) # Field name made lowercase.
+    userid = models.ForeignKey(Accounts, db_column='userID') # Field name made lowercase.
     organization = models.CharField(max_length=240)
     position = models.CharField(max_length=150)
     startdate = models.DateField(db_column='startDate') # Field name made lowercase.
@@ -162,7 +162,7 @@ class Jsaffiliations(models.Model):
         return unicode((self.userid,self.organization,self.position))
 
 class Jsawards(models.Model):
-    userid = models.ForeignKey(Accounts, db_column='userID',primary_key=True) # Field name made lowercase.
+    userid = models.ForeignKey(Accounts, db_column='userID') # Field name made lowercase.
     institution = models.CharField(max_length=180)
     award = models.CharField(max_length=240)
     datereceived = models.DateField(db_column='dateReceived') # Field name made lowercase.
@@ -172,7 +172,7 @@ class Jsawards(models.Model):
         return unicode((self.userid,self.institution,self.award))
 
 class Jseducation(models.Model):
-    userid = models.ForeignKey(Accounts, db_column='userID',primary_key=True) # Field name made lowercase.
+    userid = models.ForeignKey(Accounts, db_column='userID') # Field name made lowercase.
     institution = models.CharField(max_length=180)
     degree = models.CharField(max_length=150)
     startdate = models.DateField(db_column='startDate',default='2006-01-01') # Field name made lowercase.
@@ -185,7 +185,7 @@ class Jseducation(models.Model):
 
 
 class Jsemployment(models.Model):
-    userid = models.ForeignKey(Accounts, db_column='userID',primary_key=True) # Field name made lowercase.
+    userid = models.ForeignKey(Accounts, db_column='userID') # Field name made lowercase.
     employer = models.CharField(max_length=150)
     position = models.CharField(max_length=150)
     description = models.TextField(blank=True)
@@ -198,7 +198,6 @@ class Jsemployment(models.Model):
 
 
 class Jsprojects(models.Model):
-    projectid = models.AutoField(primary_key=True, db_column='projectID') # Field name made lowercase.
     userid = models.ForeignKey(Accounts,db_column='userID') # Field name made lowercase.
     title = models.CharField(max_length=300)
     description = models.TextField()
@@ -209,7 +208,7 @@ class Jsprojects(models.Model):
 
 
 class Jsseminars(models.Model):
-    userid = models.ForeignKey(Accounts, db_column='userID',primary_key=True) # Field name made lowercase.
+    userid = models.ForeignKey(Accounts, db_column='userID') # Field name made lowercase.
     title = models.CharField(max_length=180)
     startdate = models.DateField(db_column='startDate',default='2006-01-01') # Field name made lowercase.
     enddate = models.DateField(null=True, db_column='endDate', blank=True) # Field name made lowercase.
@@ -275,3 +274,33 @@ class StudentForm(ModelForm):
 	class Meta:
 		model = Jobseeker
 		fields = ('firstname', 'lastname')
+
+class AffiliationsForm(ModelForm):
+	class Meta:
+		model = Jsaffiliations
+		exclude = ('userid')
+
+class AwardsForm(ModelForm):
+	class Meta:
+		model = Jsawards
+		exclude = ('userid')
+
+class EmploymentForm(ModelForm):
+	class Meta:
+		model = Jsemployment
+		exclude = ('userid')
+
+class EducationForm(ModelForm):
+	class Meta:
+		model = Jseducation
+		exclude = ('userid')
+
+class SeminarsForm(ModelForm):
+	class Meta:
+		model = Jsseminars
+		exclude = ('userid')
+
+class ProjectForm(ModelForm):
+	class Meta:
+		model = Jsprojects
+		exclude = ('userid')

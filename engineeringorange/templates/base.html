@@ -38,6 +38,12 @@ td {
 	border-bottom:1px solid #f4f4f4;
 }
 
+td#holder{
+	padding-top: 1px;
+	border-bottom:none;
+}
+
+
 code, blockquote {
 	display:block;
 	border-left:5px solid #ddd;
@@ -416,7 +422,8 @@ div#footer a {
 			{% endif %}
 			{%if user.usertype == 'jobseeker'%}
 				<li><a href="/jobseeker/{{user.userid}}">home</a></li>
-			{% else %}
+			{% endif %}
+			{% if user.usertye == 'admin' %}
 				<li><a href="/">home</a></li>				
 			{% endif %}
 			<li><a href="/aboutorange/">about us</a></li>
