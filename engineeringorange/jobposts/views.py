@@ -96,7 +96,19 @@ def viewpost(request, userid, jobid):
 def viewall(request, userid):
 	account = get_object_or_404(Accounts, userid=userid)
 	if account.usertype == 'employer':
-		deleteButton = BlankMessageForm(request.POST or None)
-		return render_to_response('viewallpost.html', {'user' : account, 'posts': Jobpostings.objects.filter(userid=userid).distinct(), 'delete': deleteButton}, context_instance=RequestContext(request))
+		posts =  Jobpostings.objects.filter(userid=userid).distinct()
 	else:
-		return render_to_response('viewallpost.html', {'user' : account, 'posts': Jobpostings.objects.all().distinct()}, context_instance=RequestContext(request))
+		posts =  Jobpostings.objects.all().distinct()		
+	title = request.GET.get('title', '')
+	if title:
+		qset = (
+			Q(description__icontains=title)
+		    )
+		posts = posts.filter(qset).distinct()
+
+	if account.usertype == 'employer':
+		deleteButton = BlankMessageForm(request.POST or None)
+		return render_to_response('viewallpost.html', {'user' : account, 'posts':posts, 'delete': deleteButton, 'title': title,}, context_instance=RequestContext(request))
+	else:			
+		return render_to_response('viewallpost.html', {'user' : account, 'posts': posts, 'title': title}, context_instance=RequestContext(request))
+
