@@ -8,18 +8,24 @@ from django.contrib.auth.models import User
 from django.contrib import auth
 from resume.models import *
 from messages.models import *
-from resume.forms import RegistrationForm, LogInForm
+from resume.forms import *
 import datetime
+import random
 import csv
 
 def login(request):
+    notice = ''
     if request.method == 'POST':
         loginForm = LogInForm(request.POST)
         if loginForm.is_valid():
             username = request.POST['username']
             password = request.POST['password']
             user = auth.authenticate(username=username,password=password)
-            acc = Accounts.objects.get(userid=username)
+            account = Accounts.objects.filter(userid=username).distinct()
+            if account:
+                acc = account[0]
+            else:
+                notice = 'Username is not Registered. Register for an account now!'
             if user is not None and user.is_active:
                 auth.login(request, user)
                 print('logged')
@@ -32,7 +38,7 @@ def login(request):
             print('user is not in database or is not active')
     else:
         loginForm = LogInForm()
-    return render_to_response('login.html',{'form':loginForm},context_instance=RequestContext(request))
+    return render_to_response('login.html',{'form':loginForm, 'announcements': Announcement.objects.filter(annType='a').order_by('datePosted').reverse(), 'notice': notice},context_instance=RequestContext(request))
 
 def register (request):
     if request.method == 'POST':
@@ -46,36 +52,64 @@ def register (request):
             newJobseeker = Jobseeker(userid=newAccount,firstname=request.POST['firstName'],lastname=request.POST['lastName'])
             newAccount.save()
             newJobseeker.save()
-            #print('hello')
-            return HttpResponse("Hello user has been created")
+            return HttpResponseRedirect("/")
     else:
         regForm = RegistrationForm()
     return render_to_response('registration.html',{'form':regForm},context_instance=RequestContext(request))
 
 def sendpassword(request):
-    email = request.POST.get('email', '')
+    email = request.GET.get('email', '')
+    if email :
+        #check if email is in db.
+        account = Accounts.objects.filter(email = email)
+            
+        if account:
+            print account    
+            try:
+                # generate a new password
+                result = account[0].userlink
+                password = str(random.randint(0,10000000000))
+                subject = 'Engineering Orange: Your New Password'
+                message = 'The password for your account is: ' + password + '. Please access your account and change the password immediately.'
+                print message
+                #place new password
+                result.set_password(password)
+                result.save()
+                #send the email
+                send_mail(subject, message, 'engineeringorange@gmail.com', [email])
+            except BadHeaderError:
+                return render_to_response('registration.html',{'forgotpword': 'yup!', 'notice': 'Invalid header found.'})
 
-    # generate a new password
-    result = 'hello'
-    while result:
-        password = str(random.randint(0,10000000000))
-        result = get_object_or_404(User, password = password)
-    
-    subject = 'Engineering Orange: Your New Password'
-    message = 'The password for your account is: ' + password + '. Please access your account and change the password immediately.'
+            return render_to_response('registration.html',{'forgotpword': 'yup!', 'notice': 'Your password has been sent!'})
+        else:
+            return render_to_response('registration.html',{'forgotpword': 'yup!', 'notice': 'This email hasan\'t been registered. Sign up for an account now!'})    
+    return render_to_response('registration.html',{'forgotpword': 'yup!'})
 
-    if email:
-        try:
-            #place new password
-            result.password = password
-            result.save()
-            send_mail(subject, message, 'engineeringorange@gmail.com', [email])
-        except BadHeaderError:
-            return HttpResponse('Invalid header found.')
-        return HttpResponseRedirect("/")
-    else:
-        return HttpResponse('The email entered does not have a corresponding account. Create an account for Orange now!')
-
+def changepassword(request, userid):
+    account = get_object_or_404(Accounts, userid=userid)
+    form = ChangePasswordForm(request.POST or None)
+    notice = ''
+    if request.POST and form.is_valid():
+        p = str(request.POST['password'])
+        new = str(request.POST['newpassword'])
+        rep = str(request.POST['repeatpassword'])
+        print p
+        print new
+        print rep
+        if account.userlink.check_password(p):
+            #check if the new passwords match
+            if new == rep:
+                #change the password
+                print new
+                account.userlink.set_password(new)
+                account.userlink.save()
+                notice = 'Your password has been changed.'
+            else:
+                notice = 'The New Password and Repeat Password don\'t match.'
+        else:
+            notice = 'Password typed doesn\'t match the password of this user.'
+    return render_to_response('changepassword.html',{'form': form, 'notice': notice, 'user': account}, context_instance=RequestContext(request))
+   
 def exporttocsv(request, userid, courseid, batch, city):
     account = get_object_or_404(Accounts, userid=userid)
     if request.POST:

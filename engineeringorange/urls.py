@@ -25,6 +25,8 @@ urlpatterns += patterns('',
     url(r'^accounts/login/$',views.login),
     #url(r'^accounts/logout/$',logout),
     url(r'register/',views.register),
+    url(r'resetpassword', views.sendpassword),
+    url(r'accounts/changepassword/(?P<userid>.*)/$', views.changepassword),
 
     #Jobpost URLS
     url(r'^jobpost/add/(?P<userid>.*)/$', 'engineeringorange.jobposts.views.addpost'),
